@@ -3,7 +3,36 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 import base64
 import re
+import psycopg2
+import yaml
 
+try:
+    with open ('./config.yml', 'r') as f:
+        conf = yaml.load(f)
+    
+    connection = psycopg2.connect(dbname=conf['postgres']['database'], 
+                        user=conf['postgres']['user'],
+                        host=conf['postgres']['host'],
+                        port=conf['postgres']['port'],
+                        password=conf['postgres']['password'])
+    cursor = connection.cursor()
+
+    # Print PostgreSQL Connection properties
+    print ( connection.get_dsn_parameters(),"\n")
+
+    # Print PostgreSQL version
+    cursor.execute("SELECT version();")
+    record = cursor.fetchone()
+    print("You are connected to - ", record,"\n")
+
+except (Exception, psycopg2.Error) as error :
+    print ("Error while connecting to PostgreSQL", error)
+finally:
+    #closing database connection.
+        if(connection):
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
 SCOPES = "https://www.googleapis.com/auth/gmail.readonly"
 TAG_RE = re.compile(r"<[^>]+>")
 
@@ -14,7 +43,6 @@ def remove_tags(text):
 
 def get_cost(body):
     """ Parse the body of the email and search for the first found USD amount.
-
     Parameters
     ----------
     body : string
