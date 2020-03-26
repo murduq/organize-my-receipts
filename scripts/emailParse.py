@@ -6,6 +6,7 @@ import re
 import psycopg2
 import yaml
 
+connection = None
 try:
     with open ('./config.yml', 'r') as f:
         conf = yaml.load(f)
@@ -29,10 +30,10 @@ except (Exception, psycopg2.Error) as error :
     print ("Error while connecting to PostgreSQL", error)
 finally:
     #closing database connection.
-        if(connection):
-            cursor.close()
-            connection.close()
-            print("PostgreSQL connection is closed")
+    if(connection):
+        cursor.close()
+        connection.close()
+        print("PostgreSQL connection is closed")
 SCOPES = "https://www.googleapis.com/auth/gmail.readonly"
 TAG_RE = re.compile(r"<[^>]+>")
 
